@@ -1,37 +1,33 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const router = (0, express_1.Router)();
-const historyService_js_1 = __importDefault(require("../../service/historyService.js"));
-const weatherService_js_1 = __importDefault(require("../../service/weatherService.js"));
+import { Router } from 'express';
+const router = Router();
+import HistoryService from '../../service/historyService.js';
+import WeatherService from '../../service/weatherService.js';
 // TODO: POST Request with city name to retrieve weather data
 router.post('/', async (req, res) => {
     try {
-        // Use explicit casting to access req.body properties
         const { cityName } = req.body;
         if (!cityName) {
+            // Return a response if cityName is not provided
             return res.status(400).json({ error: 'City name is required.' });
         }
         // Get weather data from WeatherService
-        const weatherData = await weatherService_js_1.default.getWeatherForCity(cityName);
+        const weatherData = await WeatherService.getWeatherForCity(cityName);
         // Save city to search history
-        await historyService_js_1.default.addCity(cityName);
+        await HistoryService.addCity(cityName);
         // Send weather data as response
-        res.status(200).json(weatherData);
+        return res.status(200).json(weatherData); // Ensure return is used here
     }
     catch (error) {
         console.error('Error fetching weather data:', error);
-        res.status(500).json({ error: 'Failed to retrieve weather data.' });
+        // Return error response to the client
+        return res.status(500).json({ error: 'Failed to retrieve weather data.' });
     }
 });
 // GET search history
-router.get('/history', async (req, res) => {
+router.get('/history', async (_req, res) => {
     try {
         // Get the list of cities from HistoryService
-        const cities = await historyService_js_1.default.getCities();
+        const cities = await HistoryService.getCities();
         res.status(200).json(cities);
     }
     catch (error) {
@@ -44,7 +40,7 @@ router.delete('/history/:id', async (req, res) => {
     try {
         const { id } = req.params;
         // Remove city from search history using the ID
-        await historyService_js_1.default.removeCity(id);
+        await HistoryService.removeCity(id);
         // Send success response
         res.status(200).json({ message: 'City successfully deleted from history.' });
     }
@@ -53,4 +49,4 @@ router.delete('/history/:id', async (req, res) => {
         res.status(500).json({ error: 'Failed to delete city from search history.' });
     }
 });
-exports.default = router;
+export default router;

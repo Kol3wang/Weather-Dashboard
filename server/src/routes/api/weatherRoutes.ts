@@ -1,20 +1,16 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 const router = Router();
 
 import HistoryService from '../../service/historyService.js';
 import WeatherService from '../../service/weatherService.js';
 
-// Define a type for the request body for POST requests
-interface WeatherRequestBody {
-  cityName: string;
-}
 // TODO: POST Request with city name to retrieve weather data
 router.post('/', async (req: Request, res: Response) => {
   try {
-    // Use explicit casting to access req.body properties
-    const { cityName } = req.body as WeatherRequestBody;
+    const { cityName } = req.body;
 
     if (!cityName) {
+      // Return a response if cityName is not provided
       return res.status(400).json({ error: 'City name is required.' });
     }
 
@@ -25,15 +21,16 @@ router.post('/', async (req: Request, res: Response) => {
     await HistoryService.addCity(cityName);
 
     // Send weather data as response
-    res.status(200).json(weatherData);
+    return res.status(200).json(weatherData); // Ensure return is used here
   } catch (error) {
     console.error('Error fetching weather data:', error);
-    res.status(500).json({ error: 'Failed to retrieve weather data.' });
+    // Return error response to the client
+    return res.status(500).json({ error: 'Failed to retrieve weather data.' });
   }
 });
 
 // GET search history
-router.get('/history', async (req: Request, res: Response) => {
+router.get('/history', async (_req: Request, res: Response) => {
   try {
     // Get the list of cities from HistoryService
     const cities = await HistoryService.getCities();
