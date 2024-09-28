@@ -34,10 +34,12 @@ class HistoryService {
     try {
       const data = await fs.promises.readFile(this.filePath, 'utf8');
       return JSON.parse(data) as City[];
-    } catch (error) {
-      // If the file doesn't exist or is empty, return an empty array
-      if (error.code === 'ENOENT') return [];
-      throw error;
+    } catch (error: unknown) {
+      // Check if error is an instance of NodeJS.ErrnoException and handle ENOENT
+      if (error instanceof Error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return [];
+      }
+      throw error; // Re-throw the error if it's not the expected type
     }
   }
 

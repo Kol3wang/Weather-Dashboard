@@ -69,10 +69,6 @@ class WeatherService {
     };
   }
 
-  // Build query string for geocoding API
-  private buildGeocodeQuery(): string {
-    return `weather?q=${this.cityName}&appid=${this.apiKey}`;
-  }
 
   // Build query string for weather data API based on coordinates
   private buildWeatherQuery(coordinates: Coordinates): string {
